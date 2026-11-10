@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LegacySnapshot.Views.TablesPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:LegacySnapshot.Models"
+    xmlns:vm="clr-namespace:LegacySnapshot.ViewModels"
+    x:DataType="vm:TablesViewModel"
+    Title="Explorador">
+    <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="10">
+        <Label Text="{Binding ActiveConnectionName, StringFormat='Base activa: {0}'}"
+               Style="{StaticResource SectionTitle}" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <SearchBar Placeholder="Buscar tabla o esquema"
+                       Text="{Binding SearchText}" />
+            <Picker Grid.Column="1"
+                    Title="Ordenar"
+                    WidthRequest="130"
+                    ItemsSource="{Binding SortOptions}"
+                    SelectedItem="{Binding SelectedSort}" />
+        </Grid>
+        <Label Grid.Row="2"
+               Text="{Binding StatusMessage}"
+               IsVisible="{Binding HasStatusMessage}"
+               Style="{StaticResource StatusMessage}" />
+        <RefreshView Grid.Row="3"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding LoadTablesCommand}">
+            <CollectionView ItemsSource="{Binding Tables}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="{Binding EmptyMessage}"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TableInfo">
+                        <Border Margin="0,0,0,8" Style="{StaticResource CardBorder}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="{Binding TableName}"
+                                           FontAttributes="Bold" />
+                                    <Label Text="{Binding SchemaName, StringFormat='Esquema: {0}'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding RowCount, StringFormat='Filas: {0:N0}'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding TotalSizeMB, StringFormat='Tamaño: {0:N2} MB'}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="Vacía"
+                                       TextColor="Gray"
+                                       IsVisible="{Binding IsEmpty}" />
+                                <Button Grid.Row="1" Grid.ColumnSpan="2"
+                                        Text="Ver columnas e índices"
+                                        Style="{StaticResource SecondaryActionButton}"
+                                        Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.ShowDetailsCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+        <Border Grid.Row="4"
+                IsVisible="{Binding IsDetailsVisible}"
+                MaximumHeightRequest="300"
+                Style="{StaticResource CardBorder}">
+            <ScrollView>
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="{Binding SelectedDetails.TableName, StringFormat='Detalle: {0}'}"
+                               Style="{StaticResource SectionTitle}"
+                               VerticalOptions="Center" />
+                        <Button Grid.Column="1"
+                                Text="Cerrar"
+                                Style="{StaticResource SecondaryActionButton}"
+                                Command="{Binding HideDetailsCommand}" />
+                    </Grid>
+                    <Label Text="{Binding SelectedDetails.SchemaName, StringFormat='Esquema: {0}'}" />
+                    <Label Text="{Binding SelectedDetails.RowCount, StringFormat='Filas: {0:N0}'}" />
+                    <Label Text="{Binding SelectedDetails.TotalSizeMB, StringFormat='Tamaño total: {0:N2} MB'}" />
+                    <Label Text="{Binding SelectedDetails.DataSizeMB, StringFormat='Tamaño de datos: {0:N2} MB'}" />
+                    <Label Text="{Binding SelectedDetails.IndexSizeMB, StringFormat='Tamaño de índices: {0:N2} MB'}" />
+                    <Label Text="Columnas" FontAttributes="Bold" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Columns}" Spacing="3">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:ColumnInfo">
+                                <Label Text="{Binding Summary}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Label Text="Índices" FontAttributes="Bold" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Indexes}" Spacing="3">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:IndexInfo">
+                                <Label Text="{Binding Summary}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Border>
+        <ActivityIndicator Grid.RowSpan="5"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           InputTransparent="True" />
+    </Grid>
+</ContentPage>

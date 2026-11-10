@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LegacySnapshot.Views.ProceduresPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:LegacySnapshot.Models"
+    xmlns:vm="clr-namespace:LegacySnapshot.ViewModels"
+    x:DataType="vm:ProceduresViewModel"
+    Title="Procedimientos">
+    <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
+        <Label Text="{Binding ActiveConnectionName, StringFormat='Base activa: {0}'}"
+               Style="{StaticResource SectionTitle}" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="20 procedimientos de mayor consumo" VerticalOptions="Center" />
+            <Picker Grid.Column="1"
+                    Title="Ordenar por"
+                    ItemsSource="{Binding SortOptions}"
+                    SelectedItem="{Binding SelectedSort}" />
+        </Grid>
+        <RefreshView Grid.Row="2"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding LoadProceduresCommand}">
+            <CollectionView ItemsSource="{Binding Procedures}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="{Binding EmptyMessage}"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ProcedureStats">
+                        <Border Margin="0,0,0,8" Style="{StaticResource CardBorder}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="{Binding ProcedureName}"
+                                           FontAttributes="Bold" />
+                                    <Label Text="{Binding SchemaName, StringFormat='Esquema: {0}'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding ExecutionCount, StringFormat='Ejecuciones: {0:N0}'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding TotalElapsedMs, StringFormat='Tiempo total: {0:N2} ms'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding AverageElapsedMs, StringFormat='Promedio: {0:N2} ms'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding MinElapsedMs, StringFormat='Mínimo: {0:N2} ms'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding MaxElapsedMs, StringFormat='Máximo: {0:N2} ms'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding TotalCpuMs, StringFormat='CPU total: {0:N0} ms'}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding TotalLogicalReads, StringFormat='Lecturas lógicas: {0:N0}'}"
+                                           FontSize="12" />
+                                    <Label Text="Sin ejecuciones registradas en caché"
+                                           IsVisible="{Binding HasNoExecutionStats}"
+                                           FontSize="12"
+                                           TextColor="DarkOrange" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1"
+                                        Text="Ver código"
+                                        Style="{StaticResource SecondaryActionButton}"
+                                        Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.ShowDefinitionCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+        <Label Grid.Row="3"
+               Text="{Binding StatusMessage}"
+               IsVisible="{Binding HasStatusMessage}"
+               Style="{StaticResource StatusMessage}" />
+        <Border Grid.Row="4"
+                IsVisible="{Binding HasDefinition}"
+                MaximumHeightRequest="280"
+                Style="{StaticResource CardBorder}">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{Binding SelectedProcedure.ProcedureName, StringFormat='Código: {0}'}"
+                       Style="{StaticResource SectionTitle}" />
+                <Editor Text="{Binding ProcedureDefinition}"
+                        IsReadOnly="True"
+                        FontFamily="monospace"
+                        HeightRequest="190"
+                        VerticalOptions="Fill" />
+            </VerticalStackLayout>
+        </Border>
+        <ActivityIndicator Grid.RowSpan="5"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           InputTransparent="True" />
+    </Grid>
+</ContentPage>

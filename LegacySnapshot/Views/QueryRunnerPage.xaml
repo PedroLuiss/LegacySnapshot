@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LegacySnapshot.Views.QueryRunnerPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:LegacySnapshot.Models"
+    xmlns:vm="clr-namespace:LegacySnapshot.ViewModels"
+    x:DataType="vm:QueryRunnerViewModel"
+    Title="Query">
+    <Grid Padding="16" RowDefinitions="Auto,*,Auto,Auto,*" RowSpacing="10">
+        <VerticalStackLayout Spacing="3">
+            <Label Text="ANÁLISIS"
+                   Style="{StaticResource Eyebrow}" />
+            <Label Text="Query Runner"
+                   Style="{StaticResource PageTitle}" />
+            <Label Text="{Binding ActiveConnectionName, StringFormat='Conexión activa: {0}'}"
+                   Style="{StaticResource PageSubtitle}" />
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1"
+                Style="{StaticResource CardBorder}"
+                MinimumHeightRequest="120">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Consulta SQL"
+                       Style="{StaticResource SectionTitle}" />
+                <Editor Text="{Binding QueryText}"
+                        Placeholder="Escribe una consulta SQL..."
+                        FontFamily="monospace"
+                        AutoSize="TextChanges"
+                        MinimumHeightRequest="90" />
+            </VerticalStackLayout>
+        </Border>
+
+        <FlexLayout Grid.Row="2"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Center">
+            <Button Text="Ejecutar"
+                    Style="{StaticResource PrimaryActionButton}"
+                    Margin="0,0,8,6"
+                    Command="{Binding ExecuteQueryCommand}" />
+            <Button Text="Cancelar"
+                    Style="{StaticResource SecondaryActionButton}"
+                    Margin="0,0,8,6"
+                    Command="{Binding CancelQueryCommand}"
+                    IsEnabled="{Binding IsBusy}" />
+            <Button Text="Exportar CSV"
+                    Style="{StaticResource SecondaryActionButton}"
+                    Margin="0,0,8,6"
+                    Command="{Binding ExportCsvCommand}" />
+        </FlexLayout>
+
+        <Label Grid.Row="3"
+               Text="{Binding StatusMessage}"
+               IsVisible="{Binding HasStatusMessage}"
+               Style="{StaticResource StatusMessage}" />
+
+        <Grid Grid.Row="4" ColumnDefinitions="2*,3*" ColumnSpacing="10">
+            <Border Style="{StaticResource CardBorder}" Padding="12">
+                <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                    <Label Text="Resultados"
+                           Style="{StaticResource SectionTitle}" />
+                    <ScrollView Grid.Row="1"
+                                Orientation="Horizontal"
+                                IsVisible="{Binding HasResults}">
+                        <Grid WidthRequest="{Binding ResultsWidth}"
+                              RowDefinitions="Auto,*"
+                              RowSpacing="1">
+                            <HorizontalStackLayout BindableLayout.ItemsSource="{Binding ResultColumns}"
+                                                   Spacing="1">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Label Text="{Binding .}"
+                                               WidthRequest="150"
+                                               FontAttributes="Bold"
+                                               FontSize="12"
+                                               LineBreakMode="TailTruncation"
+                                               Padding="8,10"
+                                               TextColor="{AppThemeBinding Light={StaticResource BrandNavy}, Dark={StaticResource White}}"
+                                               BackgroundColor="{AppThemeBinding Light=#E8F0F8, Dark=#263A50}" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                            <CollectionView Grid.Row="1"
+                                            ItemsSource="{Binding ResultRows}"
+                                            SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:QueryResultRow">
+                                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Values}"
+                                                               Spacing="1">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="x:String">
+                                                    <Label Text="{Binding .}"
+                                                           WidthRequest="150"
+                                                           FontFamily="monospace"
+                                                           FontSize="12"
+                                                           LineBreakMode="TailTruncation"
+                                                           Padding="8,7" />
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Grid>
+                    </ScrollView>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="12">
+                <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                    <Label Text="Historial (últimas 20)"
+                           Style="{StaticResource SectionTitle}" />
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding History}">
+                        <CollectionView.EmptyView>
+                            <Label Text="Todavía no hay consultas ejecutadas."
+                                   Style="{StaticResource PageSubtitle}" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:QueryHistoryItem">
+                                <VerticalStackLayout Spacing="4" Padding="0,4">
+                                    <Button Text="{Binding Query}"
+                                            Style="{StaticResource SecondaryActionButton}"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.UseHistoryItemCommand}"
+                                            CommandParameter="{Binding .}"
+                                            HorizontalOptions="Fill"
+                                            LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Summary}"
+                                           FontSize="11"
+                                           Opacity="0.75" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <ActivityIndicator Grid.RowSpan="5"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           InputTransparent="True" />
+    </Grid>
+</ContentPage>

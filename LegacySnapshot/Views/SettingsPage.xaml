@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LegacySnapshot.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Ajustes">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <VerticalStackLayout Spacing="3">
+                <Label Text="PREFERENCIAS"
+                       Style="{StaticResource Eyebrow}" />
+                <Label Text="Ajustes"
+                       Style="{StaticResource PageTitle}" />
+                <Label Text="Personaliza la experiencia de Legacy Snapshot."
+                       Style="{StaticResource PageSubtitle}" />
+            </VerticalStackLayout>
+            <Border Style="{StaticResource CardBorder}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Tema de la aplicación"
+                           Style="{StaticResource SectionTitle}" />
+            <Picker x:Name="ThemePicker"
+                    Title="Selecciona un tema"
+                    SelectedIndexChanged="OnThemeChanged" />
+                </VerticalStackLayout>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Acerca de Legacy Snapshot"
+                           Style="{StaticResource SectionTitle}" />
+                    <Label Text="Herramienta de diagnóstico para SQL Server. Revisa tablas, consulta resultados y analiza estadísticas de procedimientos almacenados."
+                           Style="{StaticResource PageSubtitle}" />
+                    <Label Text="Las consultas se ejecutan con los permisos del usuario SQL configurado. Revisa cuidadosamente el destino y el contenido antes de ejecutar, especialmente en producción."
+                           FontSize="13" />
+                    <Label Text="Versión 1.0"
+                           FontSize="12"
+                           Opacity="0.7" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LegacySnapshot.Views.ConnectionsPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:LegacySnapshot.Models"
+    xmlns:vm="clr-namespace:LegacySnapshot.ViewModels"
+    x:DataType="vm:ConnectionsViewModel"
+    Title="Conexiones">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20" RowSpacing="12">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                <Label Text="ADMINISTRACIÓN"
+                       Style="{StaticResource Eyebrow}" />
+                <Label Text="Conexiones SQL Server"
+                       Style="{StaticResource PageTitle}" />
+                <Label Text="Configura y administra los servidores de tus entornos."
+                       Style="{StaticResource PageSubtitle}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1"
+                    Text="Agregar"
+                    Command="{Binding ShowAddFormCommand}" />
+        </Grid>
+
+        <Label Grid.Row="1"
+               Text="{Binding StatusMessage}"
+               IsVisible="{Binding HasStatusMessage}"
+               TextColor="{Binding StatusColor}"
+               Style="{StaticResource StatusMessage}" />
+
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="12">
+            <Border IsVisible="{Binding IsFormVisible}"
+                    Style="{StaticResource CardBorder}"
+                    MaximumHeightRequest="460">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding FormTitle}"
+                               Style="{StaticResource SectionTitle}" />
+                        <Entry Placeholder="Nombre (por ejemplo, Dev)"
+                               Text="{Binding ConnectionName}" />
+                        <Entry Placeholder="Servidor o host,puerto"
+                               Text="{Binding Server}" />
+                        <Entry Placeholder="Base de datos"
+                               Text="{Binding Database}" />
+                        <Picker Title="Autenticación"
+                                ItemsSource="{Binding AuthenticationTypes}"
+                                SelectedItem="{Binding SelectedAuthenticationType}" />
+                        <Entry Placeholder="Usuario SQL Server"
+                               IsVisible="{Binding UsesSqlAuthentication}"
+                               Text="{Binding UserName}" />
+                        <Entry Placeholder="Contraseña"
+                               IsPassword="True"
+                               IsVisible="{Binding UsesSqlAuthentication}"
+                               Text="{Binding Password}" />
+                        <Picker Title="Ambiente"
+                                ItemsSource="{Binding Environments}"
+                                SelectedItem="{Binding SelectedEnvironment}" />
+                        <VerticalStackLayout IsVisible="{Binding CanTrustServerCertificate}"
+                                             Spacing="2">
+                            <HorizontalStackLayout Spacing="8">
+                                <CheckBox IsChecked="{Binding TrustServerCertificate}"
+                                          VerticalOptions="Center" />
+                                <Label Text="Confiar en el certificado del servidor"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label Text="Solo para desarrollo y pruebas locales. Omite la validación del certificado TLS."
+                                   FontSize="12"
+                                   TextColor="DarkOrange" />
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Probar conexión"
+                                    Style="{StaticResource SecondaryActionButton}"
+                                    Command="{Binding TestDraftConnectionCommand}" />
+                            <Button Grid.Column="1"
+                                    Text="Guardar"
+                                    Style="{StaticResource PrimaryActionButton}"
+                                    Command="{Binding SaveConnectionCommand}" />
+                        </Grid>
+                        <Button Text="Cancelar"
+                                Style="{StaticResource SecondaryActionButton}"
+                                Command="{Binding CancelFormCommand}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+
+            <CollectionView Grid.Row="1"
+                            ItemsSource="{Binding Connections}"
+                            SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="Aún no hay conexiones guardadas."
+                               HorizontalTextAlignment="Center"
+                               FontSize="18" />
+                        <Label Text="Agrega un servidor SQL Server para comenzar."
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ConnectionModel">
+                        <Border Margin="0,0,0,10" Style="{StaticResource CardBorder}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Name}"
+                                           FontAttributes="Bold"
+                                           FontSize="18" />
+                                    <Label Text="{Binding Server}" />
+                                    <Label Text="{Binding Database, StringFormat='Base de datos: {0}'}" />
+                                    <Label Text="{Binding AuthenticationType, StringFormat='Autenticación: {0}'}" />
+                                    <Label Text="{Binding LastSuccessfulConnection, StringFormat='Última conexión exitosa: {0:dd/MM/yyyy HH:mm}'}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                                <Border Grid.Column="1"
+                                        Padding="8,4"
+                                        BackgroundColor="{Binding EnvironmentColor}"
+                                        VerticalOptions="Start">
+                                    <Label Text="{Binding Environment}"
+                                           TextColor="White"
+                                           FontSize="12" />
+                                </Border>
+                                <FlexLayout Grid.Row="1" Grid.ColumnSpan="2"
+                                            Direction="Row"
+                                            Wrap="Wrap"
+                                            JustifyContent="Start"
+                                            AlignItems="Center"
+                                            Margin="0,10,0,0">
+                                    <Button Text="Conectar"
+                                            Style="{StaticResource PrimaryActionButton}"
+                                            Margin="0,0,6,6"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.ConnectCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button
+                                            Text="Probar"
+                                            Style="{StaticResource SecondaryActionButton}"
+                                            Margin="0,0,6,6"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.TestConnectionCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button
+                                            Text="{Binding FavoriteIcon}"
+                                            Style="{StaticResource SecondaryActionButton}"
+                                            Margin="0,0,6,6"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.ToggleFavoriteCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button
+                                            Text="Editar"
+                                            Style="{StaticResource SecondaryActionButton}"
+                                            Margin="0,0,6,6"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.EditConnectionCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button
+                                            Text="Eliminar"
+                                            Style="{StaticResource DangerActionButton}"
+                                            Margin="0,0,6,6"
+                                            Clicked="OnDeleteConnectionClicked"
+                                            CommandParameter="{Binding .}" />
+                                </FlexLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+        <ActivityIndicator Grid.Row="2"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           InputTransparent="True" />
+    </Grid>
+</ContentPage>
